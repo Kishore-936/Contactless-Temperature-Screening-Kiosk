@@ -1,7 +1,7 @@
 # Contactless Screening Kiosk – Automatic Gate Monitoring
 
 **Industrial IoT and Industry 4.0 (22UECH64 / M64) – Assessment 2 Hardware Prototype**
-Dr. N.G.P. Institute of Technology, Coimbatore – Department of ECE (2026-27, odd sem)
+Dr. N.G.P. Institute of Technology, Coimbatore – Department of BME (2026-27, odd sem)
 
 **Team 12 – Project 29**
 - Kishore Kumar K (710724121028)
