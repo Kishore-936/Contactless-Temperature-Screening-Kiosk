@@ -1,0 +1,8 @@
+{% extends 'base.html' %}{% block title %}{{ p.name }}{% endblock %}
+{% block body %}<h2>{{ p.name }} <span class="note">ID {{ p.patient_id }} &middot; age {{ p.age or '-' }} &middot; {{ p.phone or 'no phone' }}</span></h2>
+<p><a class="btn" href="{{ url_for('report_patient', pid=p.patient_id) }}">Download PDF report</a> <a href="{{ url_for('patients') }}">&larr; all patients</a></p>
+{% include '_history.html' %}
+<div class="card" style="margin-top:14px;max-width:420px"><h3>Reset patient password</h3>
+<form method="post" action="{{ url_for('patient_reset', pid=p.patient_id) }}" class="inline"><input type="hidden" name="csrf" value="{{ csrf_token() }}">
+<div><input name="password" type="password" minlength="4" required></div><button class="ghost">Update</button></form></div>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'base.html' %}{% block title %}Day-to-day{% endblock %}
+{% block body %}<h2>Day-to-day screening count</h2>
+<div class="card"><canvas id="dc"></canvas></div>
+<div class="card" style="margin-top:14px"><table><tr><th>Date</th><th>People screened</th><th>Unique patients</th><th>Fever flags</th><th>Avg temp</th><th>Gate detections</th></tr>
+{% for r in rows|reverse %}<tr><td>{{ r.date }}</td><td><b>{{ r.screened }}</b></td><td>{{ r.unique }}</td><td>{% if r.fever %}<span class="pill FEVER">{{ r.fever }}</span>{% else %}0{% endif %}</td><td>{{ r.avg_temp if r.avg_temp else '-' }}</td><td>{{ r.gate }}</td></tr>{% endfor %}</table>
+<p class="note">"People screened" = readings saved against a patient. "Gate detections" = sensor uploads where the gate was open (sampled every ~20 s, so it can under-count).</p></div>
+{% endblock %}
+{% block script %}<script>const R={{ rows|tojson }};
+new Chart(document.getElementById('dc'),{type:'bar',data:{labels:R.map(r=>r.date.slice(5)),datasets:[{label:'Screened',data:R.map(r=>r.screened),backgroundColor:'#2da44e'},{label:'Fever flags',data:R.map(r=>r.fever),backgroundColor:'#d1242f'},{label:'Gate detections',data:R.map(r=>r.gate),backgroundColor:'#8957e5'}]},options:{scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});</script>{% endblock %}

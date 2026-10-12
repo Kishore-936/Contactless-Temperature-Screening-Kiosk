@@ -1,0 +1,9 @@
+{% extends 'base.html' %}{% block title %}Alerts{% endblock %}
+{% block body %}<h2>Alerts</h2>
+<div class="card"><div class="row"><div><h3>Telegram</h3><span class="pill {{ 'ok' if tg_on else 'warn' }}">{{ 'configured' if tg_on else 'not configured' }}</span></div>
+<div><h3>E-mail</h3><span class="pill {{ 'ok' if em_on else 'warn' }}">{{ 'configured' if em_on else 'not configured' }}</span></div>
+<form method="post" style="align-self:center"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button>Send test alert</button></form></div>
+<p class="note">Set the Telegram / e-mail details in the <code>.env</code> file, then restart the app.</p></div>
+<div class="card" style="margin-top:14px"><table><tr><th>Time (IST)</th><th>Alert</th><th>Message</th><th>Telegram</th><th>E-mail</th></tr>
+{% for a in rows %}<tr><td>{{ a.ts|ist }}</td><td><b>{{ a.kind }}</b></td><td>{{ a.message }}</td><td>{{ a.telegram }}</td><td>{{ a.email }}</td></tr>{% else %}<tr><td colspan="5" class="note">No alerts yet</td></tr>{% endfor %}</table></div>
+{% endblock %}

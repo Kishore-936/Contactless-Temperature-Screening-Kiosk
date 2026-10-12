@@ -1,0 +1,55 @@
+{% extends 'base.html' %}{% block title %}Live Dashboard{% endblock %}
+{% block body %}
+<div class="grid g4">
+  <div class="card"><h3>Temperature (DHT11, air)</h3><div class="big" id="vTemp">--<span class="unit"> &deg;C</span></div><div class="note">Limit {{ s.temp_limit }} &deg;C</div></div>
+  <div class="card"><h3>Humidity</h3><div class="big" id="vHum">--<span class="unit"> %</span></div><div class="note">Range {{ s.hum_min }}-{{ s.hum_max }} %</div></div>
+  <div class="card"><h3>Distance (HC-SR04)</h3><div class="big" id="vDist">--<span class="unit"> cm</span></div><div class="note">-1 = nothing in range</div></div>
+  <div class="card"><h3>Gate</h3><div class="big" id="vGate">--</div><div class="note" id="vLast">&nbsp;</div></div>
+</div>
+<div class="grid g2" style="margin-top:14px">
+  <div class="card"><h3>Temperature &amp; humidity - latest readings</h3><canvas id="c1"></canvas></div>
+  <div class="card"><h3>Distance &amp; gate - latest readings</h3><canvas id="c2"></canvas></div>
+</div>
+<div class="grid g2" style="margin-top:14px">
+  <div class="card"><h3>Screen a patient now</h3>
+    <form method="post" action="{{ url_for('screen') }}" class="inline"><input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <div style="flex:2;min-width:180px"><label>Patient</label>
+        <select name="patient_id" required><option value="">Choose registered patient...</option>
+        {% for p in patients %}<option value="{{ p.patient_id }}">{{ p.name }} ({{ p.patient_id }})</option>{% endfor %}</select></div>
+      <div style="flex:2;min-width:160px"><label>Notes (optional)</label><input name="notes" maxlength="200"></div>
+      <button>Save current reading</button>
+      <label style="flex-basis:100%;font-weight:400"><input type="checkbox" name="force" value="1" style="width:auto"> use last reading even if sensor is offline</label>
+    </form>
+    <p class="note">Hold the patient near the sensor, wait for the live value above, then save. {% if not patients %}<a href="{{ url_for('patients') }}">Register a patient first.</a>{% endif %}</p>
+  </div>
+  <div class="card"><h3>Today</h3>
+    <div class="row"><div><div class="big">{{ today.screened if today else 0 }}</div><div class="note">people screened</div></div>
+    <div><div class="big {{ 'hot' if today and today.fever }}">{{ today.fever if today else 0 }}</div><div class="note">fever flags</div></div>
+    <div><div class="big">{{ today.gate if today else 0 }}</div><div class="note">gate detections</div></div></div>
+    <p><a href="{{ url_for('daily') }}">See day-to-day counts &rarr;</a></p></div>
+</div>
+<div class="grid g2" style="margin-top:14px">
+  <div class="card"><h3>Recent screenings</h3><table><tr><th>Time</th><th>Patient</th><th>Temp</th><th>Status</th></tr>
+    {% for r in recent %}<tr><td>{{ r.ts|ist('%d %b %H:%M') }}</td><td>{{ r.patient_name }}</td><td>{{ '%.1f'|format(r.temp) }}</td><td><span class="pill {{ r.status }}">{{ r.status }}</span></td></tr>{% else %}<tr><td colspan="4" class="note">None yet</td></tr>{% endfor %}</table></div>
+  <div class="card"><h3>Latest alerts</h3><table><tr><th>Time</th><th>Alert</th><th>TG</th><th>Mail</th></tr>
+    {% for a in alerts %}<tr><td>{{ a.ts|ist('%d %b %H:%M') }}</td><td>{{ a.kind }}</td><td>{{ a.telegram }}</td><td>{{ a.email }}</td></tr>{% else %}<tr><td colspan="4" class="note">None yet</td></tr>{% endfor %}</table></div>
+</div>
+{% endblock %}
+{% block script %}<script>
+const $=id=>document.getElementById(id);
+async function latest(){try{const r=await (await fetch('/api/latest')).json();
+ $('vTemp').innerHTML=(r.temp==null?'--':r.temp.toFixed(1))+'<span class="unit"> °C</span>';$('vTemp').className='big'+(r.hot?' hot':'');
+ $('vHum').innerHTML=(r.humidity==null?'--':r.humidity.toFixed(1))+'<span class="unit"> %</span>';
+ $('vDist').innerHTML=(r.distance==null?'--':r.distance.toFixed(1))+'<span class="unit"> cm</span>';
+ $('vGate').innerHTML=r.gate==null?'--':(r.gate?'<span class="pill ok">OPEN</span>':'<span class="pill warn">CLOSED</span>');
+ $('vLast').textContent='Last data: '+(r.last||'-');
+ $('connState').textContent=r.state;$('connBadge').className='badge '+r.state;$('connLast').innerHTML='&nbsp;last data '+(r.last||'-');}catch(e){}}
+let c1,c2;
+async function series(){const d=await (await fetch('/api/series?n=60')).json();
+ const o1={labels:d.t,datasets:[{label:'Temp °C',data:d.temp,borderColor:'#d1242f',tension:.3,yAxisID:'y'},{label:'Humidity %',data:d.humidity,borderColor:'#1f6feb',tension:.3,yAxisID:'y1'}]};
+ const o2={labels:d.t,datasets:[{label:'Distance cm',data:d.distance,borderColor:'#8957e5',tension:.3,spanGaps:true,yAxisID:'y'},{label:'Gate (1=open)',data:d.gate,borderColor:'#2da44e',stepped:true,yAxisID:'y1'}]};
+ const sc=(a,b)=>({y:{position:'left',title:{display:true,text:a}},y1:{position:'right',grid:{drawOnChartArea:false},title:{display:true,text:b}}});
+ if(!c1){c1=new Chart($('c1'),{type:'line',data:o1,options:{scales:sc('°C','%'),animation:false,pointRadius:1}});c2=new Chart($('c2'),{type:'line',data:o2,options:{scales:sc('cm','gate'),animation:false,pointRadius:1}});}
+ else{c1.data=o1;c2.data=o2;c1.update();c2.update();}}
+latest();series();setInterval(latest,5000);setInterval(series,20000);
+</script>{% endblock %}

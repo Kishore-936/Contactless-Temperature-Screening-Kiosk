@@ -1,0 +1,8 @@
+{% extends 'base.html' %}{% block title %}My Screenings{% endblock %}
+{% block body %}<h2>Welcome, {{ p.name }} <span class="note">Patient ID {{ p.patient_id }}</span></h2>
+{% if rows %}<div class="card" style="margin-bottom:14px"><h3>Latest result</h3>
+<div class="big {{ 'hot' if rows[0].status=='FEVER' }}">{{ '%.1f'|format(rows[0].temp) }}<span class="unit"> &deg;C</span> <span class="pill {{ rows[0].status }}">{{ rows[0].status }}</span></div>
+<div class="note">{{ rows[0].ts|ist }} IST &middot; {{ rows|length }} screening(s) in total</div></div>{% endif %}
+<p><a class="btn" href="{{ url_for('report_patient', pid=p.patient_id) }}">Download my PDF report</a></p>
+{% include '_history.html' %}
+{% endblock %}

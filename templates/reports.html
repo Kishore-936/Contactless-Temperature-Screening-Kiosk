@@ -1,0 +1,10 @@
+{% extends 'base.html' %}{% block title %}Reports{% endblock %}
+{% block body %}<h2>Reports</h2>
+<div class="grid g2">
+<div class="card"><h3>Daily report (PDF with charts)</h3>
+<form method="get" action="{{ url_for('report_daily') }}" class="inline"><div><label>Date</label><input type="date" name="date" value="{{ today }}" required></div><button>Download PDF</button></form></div>
+<div class="card"><h3>Patient report (PDF with chart)</h3>
+<form class="inline" onsubmit="if(!this.pid.value)return false;location='/reports/patient/'+encodeURIComponent(this.pid.value)+'.pdf';return false">
+<div style="flex:1"><label>Patient</label><select name="pid" required><option value="">Choose...</option>{% for p in patients %}<option value="{{ p.patient_id }}">{{ p.name }} ({{ p.patient_id }})</option>{% endfor %}</select></div><button>Download PDF</button></form></div>
+<div class="card"><h3>All screenings (CSV / Excel)</h3><a class="btn" href="{{ url_for('report_csv') }}">Download CSV</a></div>
+</div>{% endblock %}

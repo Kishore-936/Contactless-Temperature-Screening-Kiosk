@@ -1,0 +1,4 @@
+<div class="grid g2"><div class="card"><h3>Temperature trend (limit {{ limit }} &deg;C)</h3><canvas id="pc"></canvas></div>
+<div class="card"><h3>Screening history</h3><table><tr><th>Time</th><th>Temp</th><th>Humidity</th><th>Status</th></tr>
+{% for r in rows %}<tr><td>{{ r.ts|ist('%d-%m-%Y %H:%M') }}</td><td>{{ '%.1f'|format(r.temp) }} &deg;C</td><td>{{ '%.0f'|format(r.humidity) if r.humidity is not none else '-' }} %</td><td><span class="pill {{ r.status }}">{{ r.status }}</span></td></tr>{% else %}<tr><td colspan="4" class="note">No screenings yet</td></tr>{% endfor %}</table></div></div>
+<script>const D={{ chart|tojson }};new Chart(document.getElementById('pc'),{type:'line',data:{labels:D.map(x=>x.t),datasets:[{label:'Temp °C',data:D.map(x=>x.temp),borderColor:'#1f6feb',tension:.3},{label:'Limit',data:D.map(()=>{{ limit }}),borderColor:'#d1242f',borderDash:[6,4],pointRadius:0}]}});</script>

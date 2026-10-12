@@ -1,0 +1,15 @@
+{% extends 'base.html' %}{% block title %}Patients{% endblock %}
+{% block body %}<h2>Patients</h2>
+<div class="card"><h3>Register a new patient (also creates their login)</h3>
+<form method="post" class="inline"><input type="hidden" name="csrf" value="{{ csrf_token() }}">
+<div><label>Patient ID (login)</label><input name="patient_id" required maxlength="20" placeholder="P001"></div>
+<div style="flex:2"><label>Patient name</label><input name="name" required maxlength="60"></div>
+<div style="max-width:90px"><label>Age</label><input name="age" inputmode="numeric" maxlength="3"></div>
+<div><label>Phone</label><input name="phone" maxlength="15"></div>
+<div><label>Password for patient</label><input name="password" type="password" required minlength="4"></div>
+<button>Add patient</button></form></div>
+<div class="card" style="margin-top:14px"><table><tr><th>ID</th><th>Name</th><th>Age</th><th>Screenings</th><th>Last temp</th><th>Last status</th><th></th></tr>
+{% for r in rows %}<tr><td>{{ r.patient_id }}</td><td>{{ r.name }}</td><td>{{ r.age or '-' }}</td><td>{{ r.n }}</td>
+<td>{{ '%.1f'|format(r.last_temp) if r.last_temp else '-' }}</td><td>{% if r.last_status %}<span class="pill {{ r.last_status }}">{{ r.last_status }}</span>{% endif %}</td>
+<td><a href="{{ url_for('patient_detail', pid=r.patient_id) }}">Open</a></td></tr>{% else %}<tr><td colspan="7" class="note">No patients yet</td></tr>{% endfor %}</table></div>
+{% endblock %}

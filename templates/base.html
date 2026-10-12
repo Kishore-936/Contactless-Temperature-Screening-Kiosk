@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}Dashboard{% endblock %} - Kiosk</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('theme')||'light'}catch(e){}</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head><body>
+{% if demo %}<div class="demo">DEMO MODE - the readings below are SIMULATED, not from the real sensor</div>{% endif %}
+<header class="top">
+  <h1>Contactless Temperature Screening Kiosk<small>IIoT Project 29 &middot; Team 12 &middot; ESP32 + DHT11 + HC-SR04 + ThingSpeak</small></h1>
+  <span class="badge {{ conn_state }}" id="connBadge"><span class="dot"></span>Sensor: <b id="connState">{{ conn_state }}</b>
+    <span style="opacity:.75;font-weight:400" id="connLast">&nbsp;last data {{ conn_last }}</span></span>
+  <button class="ghost" style="color:#fff;border-color:rgba(255,255,255,.3)" onclick="var t=document.documentElement.dataset.theme=='dark'?'light':'dark';document.documentElement.dataset.theme=t;try{localStorage.setItem('theme',t)}catch(e){}">Theme</button>
+</header>
+{% if user %}
+<nav class="menu">
+  {% if role=='staff' %}
+    {% set items=[('dashboard','Live Dashboard'),('patients','Patients'),('daily','Day-to-day'),('alerts','Alerts'),('reports','Reports'),('settings','Settings')] %}
+    {% for ep,label in items %}<a href="{{ url_for(ep) }}" class="{{ 'on' if request.endpoint==ep or (ep=='patients' and request.endpoint=='patient_detail') }}">{{ label }}</a>{% endfor %}
+  {% else %}<a class="on" href="{{ url_for('my_page') }}">My Screenings</a>{% endif %}
+  <span class="sp"></span><span class="note" style="margin-right:10px">{{ user }} ({{ role }})</span>
+  <form method="post" action="{{ url_for('logout') }}" style="margin:0"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="ghost">Log out</button></form>
+</nav>{% endif %}
+<main>
+{% with m=get_flashed_messages(with_categories=true) %}{% for c,t in m %}<div class="flash {{ c }}">{{ t }}</div>{% endfor %}{% endwith %}
+{% block body %}{% endblock %}
+</main>
+<footer>DHT11 measures <b>air</b> temperature (about &plusmn;2&nbsp;&deg;C). This is a student prototype for screening demonstration, not a medical device.</footer>
+{% block script %}{% endblock %}
+</body></html>

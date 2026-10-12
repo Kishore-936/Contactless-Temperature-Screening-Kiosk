@@ -1,0 +1,13 @@
+{% extends 'base.html' %}{% block title %}Settings{% endblock %}
+{% block body %}<h2>Alert settings</h2>
+<div class="card" style="max-width:640px"><form method="post"><input type="hidden" name="csrf" value="{{ csrf_token() }}">
+<div class="row"><div><label>Temperature limit (&deg;C)</label><input name="temp_limit" value="{{ s.temp_limit }}" required></div>
+<div><label>Humidity min (%)</label><input name="hum_min" value="{{ s.hum_min }}" required></div>
+<div><label>Humidity max (%)</label><input name="hum_max" value="{{ s.hum_max }}" required></div></div><br>
+<div class="row"><div><label>Sensor offline after (minutes)</label><input name="offline_minutes" value="{{ s.offline_minutes }}" required></div>
+<div><label>Alert cool-down (minutes)</label><input name="cooldown_min" value="{{ s.cooldown_min }}" required></div></div><br>
+<label style="font-weight:400"><input type="checkbox" name="alert_temp" style="width:auto" {{ 'checked' if s.alert_temp=='1' }}> High temperature alert</label>
+<label style="font-weight:400"><input type="checkbox" name="alert_gate" style="width:auto" {{ 'checked' if s.alert_gate=='1' }}> Gate opened alert</label>
+<label style="font-weight:400"><input type="checkbox" name="alert_offline" style="width:auto" {{ 'checked' if s.alert_offline=='1' }}> Sensor offline alert</label>
+<label style="font-weight:400"><input type="checkbox" name="alert_humidity" style="width:auto" {{ 'checked' if s.alert_humidity=='1' }}> Humidity out-of-range alert</label><br>
+<button>Save settings</button></form></div>{% endblock %}
